@@ -1,0 +1,51 @@
+@page "/customers"
+@rendermode InteractiveServer
+
+<style>
+    .wrap-text {
+    white-space: normal !important;
+    word-break: break-word;
+}
+</style> 
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="px-5 pt-5"> 
+    <MudGrid Justify="Justify.SpaceBetween" > 
+        <MudItem>
+            <MudText Typo="Typo.h4">Clientes</MudText>
+        </MudItem>
+        <MudItem>
+            <MudButton @onclick="CreateCustomer" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">
+                Agregar
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+    
+    <MudPaper Class="mt-4 pa-4">
+        
+         <MudDataGrid  Items="@customers" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Nombre"/>
+                <PropertyColumn Property="x => x.NumberPhone" Title="Número de telefono" />
+                <PropertyColumn Property="x => x.Address" Title="Dirección" CellClass="wrap-text"/>
+                <PropertyColumn  Property=@(x => x.IsActive?"Activo":"Desactivado") Title="Estado" />
+                <TemplateColumn Title="Acción" >
+                    <CellTemplate Context="context" >
+                        <MudStack Row>
+                            <MudIconButton  @onclick="(()=>EditCustomer(context.Item.Id))"  Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="delete2" />
+
+                            @if(context.Item.IsActive)
+                            {
+                                <MudIconButton @onclick="(()=>DeactiveAndActivateCustomer(context.Item.Id))" Icon="@Icons.Material.Filled.PanoramaFishEye" Color="Color.Default" aria-label="hide" />
+                            }else{
+                                <MudIconButton @onclick="(()=>DeactiveAndActivateCustomer(context.Item.Id))" Icon="@Icons.Material.Filled.HideSource" Color="Color.Error" aria-label="active" />
+                            }
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid> 
+
+    </MudPaper> 
+</MudContainer>
+
+
+

@@ -1,0 +1,54 @@
+﻿@using InventaryManagementSystem.helpers.CategoriesHelpers
+@inject ISnackbar Snackbar
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="CategoryDetail.Title" T="string" Label="Título" Immediate="true" MaxLength="25"
+            Counter="25" />
+        <MudTextField @bind-Value="CategoryDetail.Description" T="string" Label="Descripción" Immediate="true"
+            MaxLength="80" Counter="80" Lines="5" Variant="Variant.Text" Adornment="Adornment.End" />
+    </DialogContent>
+
+    <DialogActions>
+        @if (ButtonOptions == ButtonsDialog.CreateAndCancel)
+        {
+            <MudButton Color="Color.Primary" OnClick="CreateOrSaveChanges">Crear</MudButton>
+        }
+        else
+        {
+            <MudButton Color="Color.Info" OnClick="CreateOrSaveChanges">Guardar</MudButton>
+        }
+        <MudButton Color="Color.Error" OnClick="Cancel">Cancelar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    
+
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public CategoryDetail CategoryDetail { get; set; } = new();
+
+    [Parameter]
+    public ButtonsDialog ButtonOptions { get; set; } = ButtonsDialog.CreateAndCancel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await MudDialog.SetOptionsAsync(new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            FullWidth = true,
+            CloseButton = true
+        });
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void CreateOrSaveChanges()
+    {
+        MudDialog.Close(DialogResult.Ok<CategoryDetail>(CategoryDetail));
+    }
+
+}

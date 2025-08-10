@@ -1,0 +1,105 @@
+﻿
+@using InventaryManagementSystem.helpers.ProductsHelpers
+@using InventaryManagementSystem.Services
+@using InventaryManagementSystem.Models.InventaryManagementSystem
+@using System.Globalization
+@using System.Diagnostics
+@inject ISnackbar Snackbar
+@inject ICategoriesService CategoriesService
+@inject ISuppliersService SuppliersService
+<MudDialog>
+    <DialogContent>
+        <MudSelect  @bind-Value="SelectProductDetail.CategoryName" Label="Categorías" Placeholder="Selecciona una categoría" Variant="Variant.Text" ReadOnly="IsEditProduct?false:true">
+            @foreach(Category category in categories)
+            {
+                <MudSelectItem Value="@category.Title">@category.Title</MudSelectItem>
+            }
+        </MudSelect>
+        <br/>
+        <MudSelect @bind-Value="SelectProductDetail.SupplierName" Label="Proveedores" Placeholder="Selecciona un proveedor" Variant="Variant.Text" ReadOnly="IsEditProduct?false:true">
+            @foreach(Supplier supplier in suppliers)
+            {
+                <MudSelectItem Value="@supplier.Name">@supplier.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <br/>
+         <MudTextField  @bind-Value="SelectProductDetail.ProductName" T="string" Label="Nombre" Immediate="true" MaxLength="50"
+            Counter="50" ReadOnly="IsEditProduct?false:true"/>
+        <MudTextField @bind-Value="SelectProductDetail.Description" T="string" Lines="5" Label="Descripción" Immediate="true" MaxLength="200"
+            Counter="200" ReadOnly="IsEditProduct?false:true"/>
+        
+        @if(IsEditProduct is false)
+        {
+
+            <MudNumericField @bind-Value="SelectProductDetail.Stock" Label="Cantidad" 
+            Immediate="true" Format="N0" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
+           Clearable="true" HideSpinButtons="true" Variant="Variant.Text" Max="2_147_483_647" Min="0" ReadOnly="true"/>
+        }
+
+        <MudNumericField @bind-Value="SelectProductDetail.SalePrice" @ref="MudNumericFieldSalePrice" Label="Precio de venta" 
+            Immediate="true" Format="N2" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
+            Adornment="Adornment.Start" AdornmentText="C$" AdornmentColor="Color.Primary" Clearable="true" HideSpinButtons="true"
+            Variant="Variant.Text" Max="99999999" Min="1" ReadOnly="IsEditProduct?false:true"
+            @onclick="@(()=>MudNumericFieldSalePrice?.SelectAsync())"/>
+
+    </DialogContent>
+
+    <DialogActions>
+        @if(IsEditProduct is false)
+        {
+            <MudButton Color="Color.Info" OnClick="Ok">Salir</MudButton>
+        }else{
+            <MudButton Color="Color.Info" OnClick="SaveChanges">Guardar</MudButton>
+            <MudButton Color="Color.Error" OnClick="Cancel">Cancelar</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {    
+    
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public SelectProductDetail SelectProductDetail { get; set; } = default!;
+    [Parameter]
+    public bool IsEditProduct {get; set;} = true;
+
+    private List<Category> categories = new();
+    private List<Supplier> suppliers = new();
+    private MudNumericField<decimal>? MudNumericFieldSalePrice {get; set;}
+    protected override async Task OnInitializedAsync()
+    {
+        await MudDialog.SetOptionsAsync(new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            FullWidth = true,
+            CloseButton = true,
+            MaxWidth = MaxWidth.ExtraSmall
+        });
+
+        suppliers = (await SuppliersService.GetAllSuppliers()).Where(x=>x.IsActive).ToList();
+        categories = (await CategoriesService.GetAllCategories()).Where(x=>x.IsActive).ToList();
+    }
+    
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void SaveChanges()
+    {
+        ProductDetail productDetail = new()
+        {
+            CategoryId = categories.FirstOrDefault(x=>x.Title == SelectProductDetail.CategoryName)?.Id,
+            SupplierId = suppliers.FirstOrDefault(x=>x.Name == SelectProductDetail.SupplierName)?.Id,
+            Name = SelectProductDetail.ProductName,
+            Description = SelectProductDetail.Description,
+            SalePrice = SelectProductDetail.SalePrice
+        };
+        MudDialog.Close(DialogResult.Ok<ProductDetail>(productDetail)); 
+    }
+
+    private void Ok()
+    {
+        MudDialog.Close();
+    }
+}

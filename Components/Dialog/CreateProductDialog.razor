@@ -1,0 +1,96 @@
+﻿
+@using InventaryManagementSystem.helpers.ProductsHelpers
+@using InventaryManagementSystem.Services
+@using InventaryManagementSystem.Models.InventaryManagementSystem
+@using System.Globalization
+@inject ISnackbar Snackbar
+@inject ICategoriesService CategoriesService
+@inject ISuppliersService SuppliersService
+<MudDialog>
+    <DialogContent>
+        <MudSelect @bind-Value="CategoryId" Label="Categorías" Placeholder="Selecciona una categoría" Variant="Variant.Text">
+            @foreach(Category category in categories)
+            {
+                <MudSelectItem Value="@category.Id.ToString()">@category.Title</MudSelectItem>
+            }
+        </MudSelect>
+        <br/>
+
+        <MudSelect @bind-Value="SupplierId" Label="Proveedores" Placeholder="Selecciona un proveedor" Variant="Variant.Text">
+            @foreach(Supplier supplier in suppliers)
+            {
+                <MudSelectItem Value="@supplier.Id.ToString()">@supplier.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <br/>
+         <MudTextField  @bind-Value="ProductDetail.Name" T="string" Label="Nombre" Immediate="true" MaxLength="50"
+            Counter="50" />
+        <MudTextField @bind-Value="ProductDetail.Description" T="string" Lines="5" Label="Descripción" Immediate="true" MaxLength="200"
+            Counter="200" />
+
+        <MudNumericField @bind-Value="ProductDetail.Stock" @ref="MudNumericFieldStock" Label="Cantidad" 
+            Immediate="true" Format="N0" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
+           Clearable="true" HideSpinButtons="true" Variant="Variant.Text" Max="2_147_483_647" Min="0"
+           @onclick="@(()=>MudNumericFieldStock?.SelectAsync())"/>
+
+        <MudNumericField @bind-Value="ProductDetail.CostPrice" @ref="MudNumericFieldCostPrice" Label="Precio de compra" 
+            Immediate="true" Format="N2" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
+            Adornment="Adornment.Start" AdornmentText="C$" AdornmentColor="Color.Primary" Clearable="true" HideSpinButtons="true"
+            Variant="Variant.Text" Max="99999999" Min="1"
+            @onclick="@(()=>MudNumericFieldCostPrice?.SelectAsync())"/>
+
+        <MudNumericField @bind-Value="ProductDetail.SalePrice" @ref="MudNumericFieldSalePrice" Label="Precio de venta" 
+            Immediate="true" Format="N2" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
+            Adornment="Adornment.Start" AdornmentText="C$" AdornmentColor="Color.Primary" Clearable="true" HideSpinButtons="true"
+            Variant="Variant.Text" Max="99999999" Min="1"
+            @onclick="@(()=>MudNumericFieldSalePrice?.SelectAsync())"/>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="CreateOrSaveChanges">Crear</MudButton>
+        <MudButton Color="Color.Error" OnClick="Cancel">Cancelar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {    
+    
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter]
+    public ButtonsDialog ButtonOptions { get; set; } = ButtonsDialog.CreateAndCancel;
+
+    public ProductDetail ProductDetail { get; set; } = new();
+    private List<Category> categories = new();
+    private List<Supplier> suppliers = new();
+    private MudNumericField<int?>? MudNumericFieldStock {get; set;}//Es de tipo int? porque la propiedad ProductDetail.Stock? es nullable
+    private MudNumericField<decimal?>? MudNumericFieldCostPrice {get; set;}
+    private MudNumericField<decimal?>? MudNumericFieldSalePrice {get; set;}
+    private string CategoryId = string.Empty;
+    private string SupplierId = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await MudDialog.SetOptionsAsync(new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            FullWidth = true,
+            CloseButton = true,
+            MaxWidth = MaxWidth.ExtraSmall
+        });
+
+        categories = (await CategoriesService.GetAllCategories()).Where(x=>x.IsActive).ToList();
+        suppliers = (await SuppliersService.GetAllSuppliers()).Where(x=>x.IsActive).ToList();
+
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void CreateOrSaveChanges()
+    {
+        if(Guid.TryParse(CategoryId, out Guid categoryId)) ProductDetail.CategoryId = categoryId;
+        if(Guid.TryParse(SupplierId, out Guid supplierId)) ProductDetail.SupplierId = supplierId;
+        
+        MudDialog.Close(DialogResult.Ok<ProductDetail>(ProductDetail));
+    }
+
+}

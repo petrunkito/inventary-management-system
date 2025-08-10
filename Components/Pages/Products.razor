@@ -1,0 +1,48 @@
+@page "/products"
+
+ <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="px-5 pt-5"> 
+    <MudGrid Justify="Justify.SpaceBetween" > 
+        <MudItem>
+            <MudText Typo="Typo.h4">Productos</MudText>
+        </MudItem>
+        <MudItem>
+            <MudButton @onclick="(() => CreateProduct())" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">
+                Agregar
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+
+    <MudPaper Class="mt-4 pa-4">
+        
+         <MudDataGrid  Items="@products" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+            <Columns>
+            
+                <PropertyColumn Property="x => x.ProductName" Title="Nombre"  />
+                <PropertyColumn Property="x => x.SalePrice" Title="Precio de venta"/>
+                @* <PropertyColumn Property="x => x.Description" Title="Descripción" CellStyle="max-width: 350px"/> *@
+                <PropertyColumn Property="x => x.Stock" Title="Cantidad" />
+
+                <PropertyColumn Property=@(x => x.IsActive?"Activo":"Desactivado")  Title="Estado"/>
+                <TemplateColumn  CellClass=" " Title="Acción"  >
+                    <CellTemplate Context="context">
+                        <MudStack Row  AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIconButton  @onclick="(()=>ShowProductDetail(context.Item.Id))"  Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Surface" aria-label="view" />
+                            <MudIconButton  @onclick="(()=>EditProduct(context.Item.Id))"  Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="delete2" />
+                            @if(context.Item.IsActive)
+                            {
+                                <MudIconButton @onclick="(()=>DeactiveAndActivateProduct(context.Item.Id))" Icon="@Icons.Material.Filled.PanoramaFishEye" Color="Color.Default" aria-label="hide" />
+                            }else{
+                                <MudIconButton @onclick="(()=>DeactiveAndActivateProduct(context.Item.Id))" Icon="@Icons.Material.Filled.HideSource" Color="Color.Error" aria-label="active" />
+
+                            }
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid> 
+
+    </MudPaper> 
+</MudContainer>
+
+
+ 
