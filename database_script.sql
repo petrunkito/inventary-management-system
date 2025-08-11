@@ -5,7 +5,7 @@
 create table categories
 (
 	id uuid default gen_random_uuid() primary key,
-	title varchar(15) not null unique,
+	title varchar(25) not null unique,
 	description varchar(80),
 	is_active boolean default true not null,
 	created_at timestamp default LOCALTIMESTAMP not null
