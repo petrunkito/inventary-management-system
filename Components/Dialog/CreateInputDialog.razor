@@ -1,0 +1,94 @@
+﻿@using InventaryManagementSystem.helpers.ProductInputHelpers
+@using InventaryManagementSystem.helpers.ProductsHelpers
+@using InventaryManagementSystem.Services
+@using InventaryManagementSystem.Models.InventaryManagementSystem
+@using System.Globalization
+@using System.Text.RegularExpressions
+@using System.Diagnostics
+@inject ISnackbar Snackbar
+@inject IProductsService ProductsService
+@inject IProductInputsService ProductInputsService
+<MudDialog>
+    <DialogContent>
+        <MudSelect Required="true" @bind-Value="inputCode" Label="Tipo" Placeholder="Selecciona el tipo de entrada"
+            Variant="Variant.Text">
+            @foreach (TypeInput input in typeInputs)
+            {
+                <MudSelectItem Value="@input.Code.ToString()">@input.Title</MudSelectItem>
+            }
+        </MudSelect>
+        <br/>
+        
+        
+        <MudAutocomplete Required="true" T="SelectProductDetail" @bind-Value="product" Label="Productos"  SearchFunc="@SearchProduct"
+            CoerceText="true" ToStringFunc="@(x=>x is null? null:x.ProductName)" />
+        
+        <br>
+
+        <MudNumericField Required="true" @bind-Value="ProductInputDetail.Amount" @ref="MudNumericFieldAmount" Label="Cantidad" 
+            Immediate="true" Format="N0" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
+           Clearable="true" HideSpinButtons="true" Variant="Variant.Text" Max="2_147_483_647" Min="0"
+           @onclick="@(()=>MudNumericFieldAmount?.SelectAsync())"/>
+        <br>
+
+        @if(int.TryParse(inputCode, out int code) && ((InputTypeCode)code) == InputTypeCode.Compra)
+        {
+            <MudNumericField Required="true" @bind-Value="ProductInputDetail.CostPrice" @ref="MudNumericFieldCostPrice" Label="Precio de compra" 
+                Immediate="true" Format="N2" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
+                Adornment="Adornment.Start" AdornmentText="C$" AdornmentColor="Color.Primary" Clearable="true" HideSpinButtons="true"
+                Variant="Variant.Text" Max="99999999" Min="1"
+                @onclick="@(()=>MudNumericFieldCostPrice?.SelectAsync())"/>
+        }
+    
+
+        
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="CreateOrSaveChanges">Crear</MudButton>
+        <MudButton Color="Color.Error" OnClick="Cancel">Cancelar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+    private MudNumericField<int?>? MudNumericFieldAmount {get; set;}
+    private MudNumericField<decimal?>? MudNumericFieldCostPrice {get; set;}        
+    public ProductInputCreate ProductInputDetail { get; set; } = new();
+    private List<TypeInput> typeInputs = new();
+    private List<SelectProductDetail> products = new();
+    private SelectProductDetail product = new();
+    private string inputCode = string.Empty;
+
+    private async Task<IEnumerable<SelectProductDetail>> SearchProduct(string value, CancellationToken token)
+    {
+        if(string.IsNullOrEmpty(value)) return products;
+        return products.Where(x=>x.ProductName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await MudDialog.SetOptionsAsync(new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            FullWidth = true,
+            CloseButton = true,
+            MaxWidth = MaxWidth.ExtraSmall
+        });
+        products = await ProductsService.GetAllProducts();
+        typeInputs = await ProductInputsService.GetTypeInputs();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void CreateOrSaveChanges()
+    {
+        
+        bool isCodeValid = int.TryParse(inputCode, out int code);
+        ProductInputDetail.InputType = isCodeValid?(InputTypeCode) code: null;
+        ProductInputDetail.ProductId = Guid.Empty == product.Id?null: product.Id;
+        MudDialog.Close(DialogResult.Ok<ProductInputCreate>(ProductInputDetail));
+    }
+
+}
