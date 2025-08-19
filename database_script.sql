@@ -58,9 +58,15 @@ create table type_outputs
 (
 	id uuid default gen_random_uuid() primary key,
 	title varchar(15) not null,
-	description varchar(50)
+	code smallint not null unique, 
+	description varchar(50),
+	is_active boolean default true not null,
+	created_at timestamp deafult LOCALTIMESTAMP not null
 );
 
+insert into type_outputs (title, code, description) values
+('Venta', 0, 'Se esta realizando una venta'),
+('Perdida', 1, 'Productos dañados, robados, pedidos, etc');
 
 create table product_inputs
 (
