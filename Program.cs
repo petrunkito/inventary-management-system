@@ -20,7 +20,7 @@ builder.Services.AddScoped<IProductInputsService, ProductInputsService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 //database
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("InventaryManagementSystemConnection"));
 });

@@ -113,7 +113,7 @@ public class ProductsService : IProductsService
             Name = createProductDetail.Name.Trim(),
             Description = createProductDetail.Description?.Trim(),
             SalePrice = (decimal)createProductDetail.SalePrice,
-            Stock = (int)createProductDetail.Stock,
+            Stock = 0,
             CreatedAt = DateTime.Now,
             IsActive = true
         };
@@ -125,7 +125,7 @@ public class ProductsService : IProductsService
         Result<bool> result = await productInputsService.CreateProductInput(new ProductInputCreate
         {
             ProductId = newProduct.Id,
-            InputType = TypeCodeInput.Compra,
+            InputType = InputTypeCode.Compra,
             Amount = (int)createProductDetail.Stock,
             CostPrice = (decimal)createProductDetail.CostPrice
         });
