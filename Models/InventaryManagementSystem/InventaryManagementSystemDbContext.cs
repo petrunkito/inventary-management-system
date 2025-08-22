@@ -33,9 +33,6 @@ public partial class InventaryManagementSystemDbContext : DbContext
 
     public virtual DbSet<TypeOutput> TypeOutputs { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("User ID=postgres;Password=console.log();Server=localhost;Port=5432;Database=inventary_management_system;Pooling=true;");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Category>(entity =>
@@ -111,7 +108,8 @@ public partial class InventaryManagementSystemDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("product_outputs_pkey");
 
             entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
-            entity.Property(e => e.Date).HasDefaultValueSql("LOCALTIMESTAMP");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("LOCALTIMESTAMP");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
 
             entity.HasOne(d => d.Customer).WithMany(p => p.ProductOutputs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -145,6 +143,8 @@ public partial class InventaryManagementSystemDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("type_outputs_pkey");
 
             entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("LOCALTIMESTAMP");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         OnModelCreatingPartial(modelBuilder);

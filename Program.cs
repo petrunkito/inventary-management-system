@@ -18,6 +18,7 @@ builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<ISuppliersService, SuppliersService>();
 builder.Services.AddScoped<IProductInputsService, ProductInputsService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IProductOutputsService, ProductOutputsServices>();
 
 //database
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>

@@ -102,7 +102,6 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("product_outputs_pkey");
 
             entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
-            entity.Property(e => e.Date).HasDefaultValueSql("LOCALTIMESTAMP");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.ProductOutputs)
                 .OnDelete(DeleteBehavior.ClientSetNull)

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace InventaryManagementSystem.Models.InventaryManagementSystem;
 
 [Table("suppliers")]
-[Index("Name", Name = "name_unique", IsUnique = true)]
+[Index("Name", Name = "suppliers_name_key", IsUnique = true)]
 public partial class Supplier
 {
     [Key]

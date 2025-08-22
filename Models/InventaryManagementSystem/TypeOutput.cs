@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace InventaryManagementSystem.Models.InventaryManagementSystem;
 
 [Table("type_outputs")]
+[Index("Code", Name = "type_outputs_code_key", IsUnique = true)]
 public partial class TypeOutput
 {
     [Key]
@@ -20,6 +21,15 @@ public partial class TypeOutput
     [Column("description")]
     [StringLength(50)]
     public string? Description { get; set; }
+
+    [Column("code")]
+    public short Code { get; set; }
+
+    [Column("is_active")]
+    public bool IsActive { get; set; }
+
+    [Column("created_at", TypeName = "timestamp without time zone")]
+    public DateTime CreatedAt { get; set; }
 
     [InverseProperty("OutputType")]
     public virtual ICollection<ProductOutput> ProductOutputs { get; set; } = new List<ProductOutput>();

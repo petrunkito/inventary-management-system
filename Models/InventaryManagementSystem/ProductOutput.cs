@@ -26,8 +26,11 @@ public partial class ProductOutput
     [Precision(10, 2)]
     public decimal TotalPrice { get; set; }
 
-    [Column("date", TypeName = "timestamp without time zone")]
-    public DateTime Date { get; set; }
+    [Column("is_active")]
+    public bool IsActive { get; set; }
+
+    [Column("created_at", TypeName = "timestamp without time zone")]
+    public DateTime CreatedAt { get; set; }
 
     [ForeignKey("CustomerId")]
     [InverseProperty("ProductOutputs")]

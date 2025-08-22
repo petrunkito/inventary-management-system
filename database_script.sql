@@ -103,7 +103,9 @@ create table product_outputs
 	customer_id uuid not null,
 	amount int not null,
 	total_price numeric(10, 2) not null,
-	date timestamp default LOCALTIMESTAMP not null,
+	is_active boolean deafult true not null,
+	created_at timestamp default LOCALTIMESTAMP not null,
+	
 	constraint fk_output_type_id
 		foreign key (output_type_id)
 		references type_outputs(id),
@@ -121,6 +123,7 @@ create table departure_details
 	amount int not null, 
 	sale_price numeric(10,2) not null,
 	total numeric(10, 2) not null,
+	is_active boolean default true not null,
 	constraint fk_product_id
 		foreign key (product_id)
 		references products(id),

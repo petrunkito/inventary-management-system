@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace InventaryManagementSystem.Models.InventaryManagementSystem;
 
 [Table("type_inputs")]
-[Index("Code", Name = "unique_code", IsUnique = true)]
+[Index("Code", Name = "type_inputs_code_key", IsUnique = true)]
 public partial class TypeInput
 {
     [Key]
@@ -18,12 +18,12 @@ public partial class TypeInput
     [StringLength(15)]
     public string Title { get; set; } = null!;
 
+    [Column("code")]
+    public short Code { get; set; }
+
     [Column("description")]
     [StringLength(50)]
     public string? Description { get; set; }
-
-    [Column("code")]
-    public short Code { get; set; }
 
     [Column("is_active")]
     public bool IsActive { get; set; }

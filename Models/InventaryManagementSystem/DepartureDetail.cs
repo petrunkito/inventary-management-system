@@ -30,6 +30,9 @@ public partial class DepartureDetail
     [Precision(10, 2)]
     public decimal Total { get; set; }
 
+    [Column("is_active")]
+    public bool IsActive { get; set; }
+    
     [ForeignKey("ProductId")]
     [InverseProperty("DepartureDetails")]
     public virtual Product Product { get; set; } = null!;

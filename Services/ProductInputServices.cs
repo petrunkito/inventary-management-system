@@ -127,6 +127,6 @@ namespace InventaryManagementSystem.Services
         Task<List<TypeInput>> GetTypeInputs();
         Task<List<ProductInputSelect>> GetProductInputs();
         Task<Result<bool>> CreateProductInput(ProductInputCreate productInputCreate);
-        Task<Result<bool>> DeactiveProductInput(Guid uuid);
+        Task<Result<bool>> DeactiveProductInput(Guid id);
     }
 }

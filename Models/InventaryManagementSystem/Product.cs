@@ -34,11 +34,11 @@ public partial class Product
     [Column("stock")]
     public int Stock { get; set; }
 
-    [Column("created_at", TypeName = "timestamp without time zone")]
-    public DateTime CreatedAt { get; set; }
-
     [Column("is_active")]
     public bool IsActive { get; set; }
+
+    [Column("created_at", TypeName = "timestamp without time zone")]
+    public DateTime CreatedAt { get; set; }
 
     [ForeignKey("CategoryId")]
     [InverseProperty("Products")]
