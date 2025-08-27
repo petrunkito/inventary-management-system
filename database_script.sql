@@ -61,7 +61,7 @@ create table type_outputs
 	code smallint not null unique, 
 	description varchar(50),
 	is_active boolean default true not null,
-	created_at timestamp deafult LOCALTIMESTAMP not null
+	created_at timestamp default LOCALTIMESTAMP not null
 );
 
 insert into type_outputs (title, code, description) values
