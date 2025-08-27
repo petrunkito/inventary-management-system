@@ -98,14 +98,14 @@ public partial class Inputs : ComponentBase
         bool? result = await DialogService.ShowMessageBox("", message, yesText: "Sí", cancelText: "No");
         if (result is null) return;
 
-        Result<bool> resultDeactiveActivate = await ProductInputService.DeactiveProductInput(id);
+        Result<bool> resultDeactive = await ProductInputService.DeactiveProductInput(id);
 
-        if (resultDeactiveActivate.Success is false)
+        if (resultDeactive.Success is false)
         {
-            await DialogService.ShowMessageBox("", resultDeactiveActivate.Error, yesText: "Comprendo");
+            await DialogService.ShowMessageBox("", resultDeactive.Error, yesText: "Comprendo");
             return;
         }
 
-        input.IsActive = !resultDeactiveActivate.Data;
+        input.IsActive = !resultDeactive.Data;
     }
 }

@@ -1,4 +1,5 @@
-﻿@using InventaryManagementSystem.helpers.ProductInputHelpers
+﻿@using InventaryManagementSystem.Components.Pages
+@using InventaryManagementSystem.helpers.ProductOutputHelpers
 @using InventaryManagementSystem.helpers.ProductsHelpers
 @using InventaryManagementSystem.Services
 @using InventaryManagementSystem.Models.InventaryManagementSystem
@@ -8,6 +9,8 @@
 @inject ISnackbar Snackbar
 @inject IProductsService ProductsService
 @inject IProductOutputsService ProductOutputService
+@inject ICustomerService CustomerService
+@inject IDialogService DialogService
 <MudDialog>
     <DialogContent>
         <MudSelect Required="true" @bind-Value="inputCode" Label="Tipo" Placeholder="Selecciona el tipo de entrada"
@@ -19,13 +22,57 @@
         </MudSelect>
         <br/>
         
-        
-        <MudAutocomplete Required="true" T="SelectProductDetail" @bind-Value="product" Label="Productos"  SearchFunc="@SearchProduct"
-            CoerceText="true" ToStringFunc="@(x=>x is null? null:x.ProductName)" />
-        
+        <MudAutocomplete Required="true" T="Customer" @bind-Value="customer" Label="Clientes"  SearchFunc="@SearchCustomer"
+            CoerceText="true" ToStringFunc="@(x=>x is null? null:x.Name)" />
         <br>
 
-        <MudNumericField Required="true" @bind-Value="ProductInputDetail.Amount" @ref="MudNumericFieldAmount" Label="Cantidad" 
+
+        <MudStack Row="true">
+            <MudAutocomplete Required="true" T="SelectProductDetail" @bind-Value="product" Label="Productos"  SearchFunc="@SearchProduct"
+            CoerceText="true" ToStringFunc="@(x=>{
+                if(x is null) return null;
+
+                return x.ProductName is null?null: $"{x.ProductName} ({x.SalePrice})";
+            })" />
+
+            <MudNumericField @bind-Value="amount" @ref="MudNumericFieldStock" Label="Cantidad" 
+            Immediate="true" Format="N0" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
+           Clearable="true" HideSpinButtons="true" Variant="Variant.Text" Max="product.Stock" Min="0"
+           @onclick="@(()=>MudNumericFieldStock?.SelectAsync())"/>
+
+           <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="(()=>AddProduct())">Agregar</MudButton>
+        </MudStack>
+        <br/>
+        @if(selectedProducts.Any())
+        {
+            <MudDataGrid  Items="@selectedProducts" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+                <Columns>
+                    <PropertyColumn Property="x => x.Name" Title="Nombre"  />
+                    <PropertyColumn Property="x => x.Amount" Title="Cantidad"  />
+                    <PropertyColumn Property="x => x.Price" Title="Precio"  />
+                    <PropertyColumn Property="x => x.Total" Title="Total"  />
+
+                    <TemplateColumn  Title="Acción"  >
+                        <CellTemplate Context="context">
+                            <MudStack Row  AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIconButton @onclick="@(()=>PopProduct(context.Item))" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="hide"/>
+                            </MudStack>
+                        </CellTemplate>
+                    </TemplateColumn> 
+                </Columns>
+            </MudDataGrid> 
+
+             <MudStack Justify="Justify.SpaceBetween" Row="true">
+                <MudText>Total</MudText>
+                <MudText >C$ @selectedProducts.Sum(x=>x.Total).ToString("N0") </MudText>
+            </MudStack>
+        }
+        
+
+    @* @(x=>x is null? null: x.ProductName) *@
+        <br>
+
+        @* <MudNumericField Required="true" @bind-Value="ProductOutputDetail.Amount" @ref="MudNumericFieldAmount" Label="Cantidad" 
             Immediate="true" Format="N0" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
            Clearable="true" HideSpinButtons="true" Variant="Variant.Text" Max="2_147_483_647" Min="0"
            @onclick="@(()=>MudNumericFieldAmount?.SelectAsync())"/>
@@ -33,12 +80,12 @@
 
         @if(int.TryParse(inputCode, out int code) && ((InputTypeCode)code) == InputTypeCode.Compra)
         {
-            <MudNumericField Required="true" @bind-Value="ProductInputDetail.CostPrice" @ref="MudNumericFieldCostPrice" Label="Precio de compra" 
+            <MudNumericField Required="true" @bind-Value="ProductOutputDetail.CostPrice" @ref="MudNumericFieldCostPrice" Label="Precio de compra" 
                 Immediate="true" Format="N2" Culture="@(CultureInfo.GetCultureInfo("en-US"))"
                 Adornment="Adornment.Start" AdornmentText="C$" AdornmentColor="Color.Primary" Clearable="true" HideSpinButtons="true"
                 Variant="Variant.Text" Max="99999999" Min="1"
-                @onclick="@(()=>MudNumericFieldCostPrice?.SelectAsync())"/>
-        }
+                @onclick="@(()=>MudNumericFieldCostPrice?.SelectAsync())"/> 
+        }*@
     
 
         
@@ -54,18 +101,85 @@
 
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
-    private MudNumericField<int?>? MudNumericFieldAmount {get; set;}
-    private MudNumericField<decimal?>? MudNumericFieldCostPrice {get; set;}        
-    public ProductInputCreate ProductInputDetail { get; set; } = new();
-    private List<TypeOutput> typeOutputs = new();
-    private List<SelectProductDetail> products = new();
-    private SelectProductDetail product = new();
-    private string inputCode = string.Empty;
+    @* private MudNumericField<int?>? MudNumericFieldAmount {get; set;}
+    private MudNumericField<decimal?>? MudNumericFieldCostPrice {get; set;}         *@
+    @* public ProductOutputCreate ProductOutputDetail { get; set; } = new();
+    
+    
+    //--
 
+    *@
+
+    private MudNumericField<int>? MudNumericFieldStock {get; set;}//Es de tipo int? porque la propiedad ProductDetail.Stock? es nullable
+
+    private List<Customer> customers = new();
+    private List<SelectProductDetail> products = new();
+    private List<ViewProductSelected> selectedProducts = new();
+    private Customer customer = new();
+    private SelectProductDetail product = new();
+    private List<TypeOutput> typeOutputs = new();
+    private string inputCode = string.Empty; 
+    private int amount;
+
+    private async Task AddProduct()
+    {
+
+        if(string.IsNullOrEmpty(product.CategoryName))
+        {
+            await DialogService.ShowMessageBox("", "Selecciona primero un producto", yesText: "Comprendo");
+            return;
+        }
+        if(amount == 0)
+        {
+            await DialogService.ShowMessageBox("", "La cantidad a soliciar debe ser mayor a 0", yesText: "Comprendo");
+            return;
+        }
+
+        ViewProductSelected? productExist = selectedProducts.Find(x=>x.Id == product.Id);
+        if(productExist is not null)
+        {
+            if((productExist.Amount + amount) > product.Stock)
+            {
+                await DialogService.ShowMessageBox("", "La cantidad a soliciar es mayor a la cantidad en almacen", yesText: "Comprendo");
+                ClearInputSelection();
+                return;
+            }
+            productExist.Amount += amount;
+        }else{
+            selectedProducts.Add(new ViewProductSelected()
+            {
+                Id = product.Id,
+                Amount = amount,
+                Name = product.ProductName,
+                Price = product.SalePrice
+            });
+        }
+
+        ClearInputSelection();
+    }
+
+    private void ClearInputSelection()
+    {
+        product = new();
+        amount = 0;
+    }
+
+    private void PopProduct(ViewProductSelected productSelected)
+    {
+        selectedProducts.Remove(productSelected);
+    }
+    private async Task<IEnumerable<Customer>> SearchCustomer(string value, CancellationToken token)
+    {
+        if(string.IsNullOrEmpty(value)) return customers;
+        return customers.Where(x=>x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
     private async Task<IEnumerable<SelectProductDetail>> SearchProduct(string value, CancellationToken token)
     {
         if(string.IsNullOrEmpty(value)) return products;
-        return products.Where(x=>x.ProductName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+
+        value = Regex.Replace(value, @"\(.*\)", "").Trim();
+        return products
+        .Where(x=>x.ProductName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
     protected override async Task OnInitializedAsync()
     {
@@ -74,21 +188,47 @@
             CloseOnEscapeKey = true,
             FullWidth = true,
             CloseButton = true,
-            MaxWidth = MaxWidth.ExtraSmall
+            MaxWidth = MaxWidth.Small
         });
         products = await ProductsService.GetAllProducts();
+        customers = await CustomerService.GetAllCustomers();
         typeOutputs = await ProductOutputService.GetTypeInputs();
     }
 
     private void Cancel() => MudDialog.Cancel();
 
-    private void CreateOrSaveChanges()
+    private async Task CreateOrSaveChanges()
     {
-        
-        bool isCodeValid = int.TryParse(inputCode, out int code);
-        ProductInputDetail.InputType = isCodeValid?(InputTypeCode) code: null;
-        ProductInputDetail.ProductId = Guid.Empty == product.Id?null: product.Id;
-        MudDialog.Close(DialogResult.Ok<ProductInputCreate>(ProductInputDetail));
+        bool isValid = int.TryParse(inputCode, out int input);
+        if(!isValid || !Enum.IsDefined(typeof(OutputTypeCode), input))
+        {
+            await DialogService.ShowMessageBox("", "Selecciona el tipo de salida antes", yesText: "Comprendo");
+            return;
+        }        
+
+        if(string.IsNullOrEmpty(customer.Name))
+        {
+            await DialogService.ShowMessageBox("", "Selecciona algun cliente", yesText: "Comprendo");
+            return;
+        }
+
+        if(!selectedProducts.Any())
+        {
+            await DialogService.ShowMessageBox("", "Ingresa almenos un producto", yesText: "Comprendo");
+            return;
+        }
+
+        ProductOutputCreate productOutputCreate = new(){
+            CustomerId = customer.Id,
+            OutputTypeCode = (OutputTypeCode)input,
+            SelectedProducts = selectedProducts.Select(x=>new ProductSelected
+            {
+                ProductId = x.Id,
+                Amount = x.Amount
+            }).ToList()
+        };
+
+        MudDialog.Close(DialogResult.Ok<ProductOutputCreate>(productOutputCreate));
     }
 
 }

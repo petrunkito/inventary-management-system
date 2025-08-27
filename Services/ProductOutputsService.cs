@@ -33,6 +33,7 @@ public class ProductOutputsServices : IProductOutputsService
             from p in context.ProductOutputs
             join c in context.Customers on p.CustomerId equals c.Id
             join o in context.TypeOutputs on p.OutputTypeId equals o.Id
+            orderby p.CreatedAt ascending
             select new ProductOutputSelect
             {
                 ProductOutputId = p.Id,
@@ -42,8 +43,8 @@ public class ProductOutputsServices : IProductOutputsService
                 Total = p.TotalPrice,
                 CreatedAt = p.CreatedAt,
                 IsActive = p.IsActive
-
             }
+
         ).ToListAsync();
         return outputs;
     }

@@ -1,0 +1,49 @@
+@page "/about"
+
+<MudGrid Justify="Justify.Center" Class="mt-16">
+    <MudItem xs="12" sm="8" md="6" lg="5">
+        <MudCard Outlined="true" Elevation="16" Class="d-flex flex-column align-center pa-8">
+            <MudAvatar Size="MudBlazor.Size.Large" Class="mb-4" Style="width:150px; height:150px;">
+                <MudImage Src=@imageProfile Alt="Aurelio Antonio Obando Flores" Class="rounded-circle"/>
+            </MudAvatar>
+            <MudText Typo="Typo.h5" Class="mb-2">Aurelio Antonio Obando Flores</MudText>
+            <MudText Align="Align.Center" Typo="Typo.body1" Class="mb-4">
+                Este proyecto de sistema de gestión de inventario fue creado por mí. La creación de cada módulo la puedes ver en mis redes sociales. Este código es gratuito y lo puedes descargar desde GitHub, una plataforma donde encontrarás una variedad de proyectos increíbles.
+            </MudText>
+
+            <MudText Typo="Typo.body2" Class="mb-2">
+                Si eres desarrollador y deseas instalarlo, puedes ver las instrucciones <MudLink Href=@repository Target="_blank">aquí</MudLink>. Si no eres desarrollador, el proceso puede ser más complejo.
+            </MudText>
+
+            <MudDivider Class="my-4" Style="width:100%;"/>
+
+            <MudText Typo="Typo.subtitle1" Class="mb-2">Tecnologías utilizadas:</MudText>
+            <MudList T="string">
+                <MudListItem Icon="@Icons.Material.Filled.Web">Blazor: como framework front-end</MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Widgets">MudBlazor: como biblioteca de componentes</MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Storage">PostgreSQL: como base de datos principal</MudListItem>
+            </MudList>
+
+            <MudDivider Class="my-4" Style="width:100%;"/>
+
+            <MudText Typo="Typo.subtitle1" Class="mb-2">Mis redes sociales:</MudText>
+            <div class="d-flex flex-row justify-center gap-4">
+                <MudLink Href=@tiktok Target="_blank" Class="d-flex align-center gap-1">
+                    <MudIcon Icon="@Icons.Custom.Brands.TikTok" Color="Color.Default" />
+                    <MudText>@@aurelio_dev</MudText>
+                </MudLink>
+                <MudLink Href=@instagram Target="_blank" Class="d-flex align-center gap-1">
+                    <MudIcon Icon="@Icons.Custom.Brands.Instagram" Color="Color.Default" />
+                    <MudText>@@aurelio_dev_</MudText>
+                </MudLink>
+            </div>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string instagram = "https://www.instagram.com/aurelio_dev_";
+    private string tiktok = "https://www.tiktok.com/@aurelio_dev";
+    private string imageProfile = "https://avatars.githubusercontent.com/u/147442266?v=4";
+    private string repository = "https://github.com/petrunkito/inventary-management-system";
+}
