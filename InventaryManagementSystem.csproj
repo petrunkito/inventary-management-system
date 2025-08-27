@@ -14,13 +14,4 @@
     <PackageReference Include="MudBlazor" Version="8.9.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
-
-  <ItemGroup>
-    <EditorConfigFiles Remove="C:\Users\aurelio\Desktop\projects\InventaryManagementSystem\InventaryManagementSystem\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="C:\Users\aurelio\Desktop\projects\InventaryManagementSystem\InventaryManagementSystem\.editorconfig" />
-  </ItemGroup>
-
 </Project>
