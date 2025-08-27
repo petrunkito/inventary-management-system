@@ -103,7 +103,7 @@ create table product_outputs
 	customer_id uuid not null,
 	amount int not null,
 	total_price numeric(10, 2) not null,
-	is_active boolean deafult true not null,
+	is_active boolean default true not null,
 	created_at timestamp default LOCALTIMESTAMP not null,
 	
 	constraint fk_output_type_id
